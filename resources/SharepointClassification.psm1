@@ -1,17 +1,19 @@
-function Get-NewSharepointClassification($customerAbbreviations){
-    return [SharepointClassification]::new()
+function Get-NewSharepointClassification($tenantID){
+    return [SharepointClassification]::new($tenantID)
 }
 
 class SharepointClassification {
 
-    [String] $credentialFilepath = "..\ressources\${env:USERNAME}_cred_$customerAbbreviations.xml"
+    [String] $tenantID
+    [String] $credentialFilepath = "..\ressources\${env:USERNAME}_cred_$($this.tenantID).xml"
     [PSCredential] $credentials
 
-    SharepointClassification(){
+    SharepointClassification($tenantID){
         if (!(Test-Path $this.credentialFilepath)) {
             Get-Credential | Export-Clixml -Path $this.credentialFilepath
         }
         $this.credentials = Import-Clixml $this.credentialFilepath
+        $this.tenantID = $tenantID
     }
 
     connectSPO([uri] $sharepointLoginURL){
@@ -19,8 +21,7 @@ class SharepointClassification {
     }
 
     connectAIPService([String] $webAppID, [String] $webAppKey, [String] $nativeAppID){
-        $token = (Set-AIPAuthentication -webAppId $webAppID -webAppKey $webAppKey -nativeAppId $nativeAppID).token
-        Set-AIPAuthentication -webAppId $webAppID -webAppKey $webAppKey -nativeAppId $nativeAppID -token $token
+        Set-AIPAuthentication -AppId $webAppID -AppSecret $webAppKey -TenantId $this.tenantID -DelegatedUser $this.credentials.UserName -OnBehalfOf $this.credentials
     }
 
     [string[]] readDocumentLibraryListFile($documentLibraryList){

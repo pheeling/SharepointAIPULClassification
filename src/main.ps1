@@ -3,7 +3,7 @@ Param(
     [String]$dataOwner,
 
     [Parameter(Mandatory=$true, HelpMessage = "Please enter Customer Abbreviation e.g DT aka Dinotronic")]
-    [String]$customerAbbreviations,
+    [String]$tenantID,
 
     [Parameter(Mandatory=$true, HelpMessage = "Which LabelID should be used for classification?")]
     [String]$labelId,
@@ -26,7 +26,7 @@ Import-Module -Force "$resourcespath\SharepointClassification.psm1"
 
 "$(Get-Date) [Processing] Start--------------------------" >> $Global:logFile
 
-$sharepoint = Get-NewSharepointClassification
+$sharepoint = Get-NewSharepointClassification($tenantID)
 
 #Requirements Check
 try {
