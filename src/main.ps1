@@ -11,6 +11,12 @@ Param(
     [Parameter(Mandatory=$true, HelpMessage = "Define Path to Sharepoint Libraries List Text File?")]
     [String]$documentLibraryList,
 
+    [Parameter(Mandatory=$true, HelpMessage = "Define Path to Sharepoint Libraries List Text File?")]
+    [String]$webAppID,
+
+    [Parameter(Mandatory=$true, HelpMessage = "Define Path to Sharepoint Libraries List Text File?")]
+    [String]$nativeAppID,
+
     [Parameter(Mandatory=$true, HelpMessage = "Sharepoint URL?")]
     [uri]$sharepointLoginUrl
 )
@@ -20,6 +26,7 @@ $Global:mainPath = split-path -path $srcPath
 $Global:resourcespath = join-path -path "$mainPath" -ChildPath "resources"
 $Global:errorVariable = "Stop"
 $Global:logFile = "$resourcespath\processing.log"
+$webAppKeyXMLFile = "..\ressources\${env:USERNAME}_appKey_$($tenantID).xml"
 
 Import-Module -Force "$resourcespath\ErrorHandling.psm1"
 Import-Module -Force "$resourcespath\SharepointClassification.psm1"
@@ -40,9 +47,12 @@ try {
     if(Get-Command Get-AIPFileStatus -ErrorAction SilentlyContinue){
         "$(Get-Date) [RequirementsCheck] Module AIP exists" >> $Global:logFile
     }
-    if(Test-Path "C:\Users\${env:USERNAME}\AppData\Local\Microsoft\MSIP\TokenCache"){
+    if(Test-Path $webAppKeyXMLFile){
         "$(Get-Date) [RequirementsCheck] token exists" >> $Global:logFile
+        $webAppKey = [PSCredential] (Import-Clixml $webAppKeyXMLFile).GetNetworkCredential().Password
     } else {
+        Get-Credential | Export-Clixml -Path $webAppKeyXMLFile
+        $webAppKey = [PSCredential] (Import-Clixml $webAppKeyXMLFile).GetNetworkCredential().Password
         $sharepoint.connectAIPService($webAppID,$webAppKey,$nativeAppID)
     }
 } catch {
