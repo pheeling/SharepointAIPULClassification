@@ -21,7 +21,7 @@ class SharepointClassification {
         Connect-PnPOnline -url  $sharepointLoginUrl -credential $this.credentials
     }
 
-    connectAIPService([String] $webAppID, [String] $webAppKey, [String] $nativeAppID){
+    connectAIPService([String] $webAppID, [String] $webAppKey){
         Set-AIPAuthentication -AppId $webAppID -AppSecret $webAppKey -TenantId $this.tenantID -DelegatedUser $this.credentials.UserName -OnBehalfOf $this.credentials
     }
 

@@ -2,7 +2,7 @@ Param(
     [Parameter(Mandatory=$true, HelpMessage = "Please enter DataOwner as UPN")]
     [String]$dataOwner,
 
-    [Parameter(Mandatory=$true, HelpMessage = "Please enter Customer Abbreviation e.g DT aka Dinotronic")]
+    [Parameter(Mandatory=$true, HelpMessage = "Please enter Customer Tenant ID")]
     [String]$tenantID,
 
     [Parameter(Mandatory=$true, HelpMessage = "Which LabelID should be used for classification?")]
@@ -11,12 +11,9 @@ Param(
     [Parameter(Mandatory=$true, HelpMessage = "Define Path to Sharepoint Libraries List Text File?")]
     [String]$documentLibraryList,
 
-    [Parameter(Mandatory=$true, HelpMessage = "Define Path to Sharepoint Libraries List Text File?")]
+    [Parameter(Mandatory=$true, HelpMessage = "Define WebApp ID for connection?")]
     [String]$webAppID,
-
-    [Parameter(Mandatory=$true, HelpMessage = "Define Path to Sharepoint Libraries List Text File?")]
-    [String]$nativeAppID,
-
+    
     [Parameter(Mandatory=$true, HelpMessage = "Sharepoint URL?")]
     [uri]$sharepointLoginUrl
 )
@@ -53,7 +50,7 @@ try {
     } else {
         Get-Credential | Export-Clixml -Path $webAppKeyXMLFile
         $webAppKey = [PSCredential] (Import-Clixml $webAppKeyXMLFile).GetNetworkCredential().Password
-        $sharepoint.connectAIPService($webAppID,$webAppKey,$nativeAppID)
+        $sharepoint.connectAIPService($webAppID,$webAppKey)
     }
 } catch {
     "$(Get-Date) [RequirementsCheck] Module installation failed: $PSItem" >> $Global:logFile
