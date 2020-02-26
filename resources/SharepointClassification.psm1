@@ -7,6 +7,7 @@ class SharepointClassification {
     [String] $tenantID
     [String] $credentialFilepath = "..\ressources\${env:USERNAME}_cred_$($this.tenantID).xml"
     [PSCredential] $credentials
+    [Array] $documentsList
 
     SharepointClassification($tenantID){
         if (!(Test-Path $this.credentialFilepath)) {
@@ -28,8 +29,14 @@ class SharepointClassification {
         return Get-Content -Path $documentLibraryList
     }
 
-    fileClassification($arrayLibrary, $labelId, $dataOwner, $sharepointLoginUrl){
-        foreach ($item in $arrayLibrary) { 
+    getSharepointLibraryEntries($array){
+        foreach ($entry in $array){
+            $this.documentsList += Get-PnPListItem -List $entry
+        }
+    }
+
+    fileClassification($documentsList, $labelId, $dataOwner, $sharepointLoginUrl){
+        foreach ($item in $documentsList) { 
             if (($item.Fieldvalues.FileRef -like "*.docx") -or ($item.Fieldvalues.FileRef -like "*.xlsx") -or ($item.Fieldvalues.FileRef -like "*.pptx")) { 
                 Get-PnPFile -Url $item.FieldValues.FileRef -Path $Global:resourcespath -AsFile -Force
                 $element = "$($Global:resourcespath)\$($item.Fieldvalues.FileLeafRef)"

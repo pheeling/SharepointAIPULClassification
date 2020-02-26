@@ -62,7 +62,8 @@ try {
 
 $sharepoint.connectSPO($sharepointLoginUrl)
 $arrayLibrary = $sharepoint.readDocumentLibraryListFile($documentLibraryList)
-$sharepoint.fileClassification($arrayLibrary, $labelId, $dataOwner, $sharepointLoginUrl)
+$sharepoint.getSharepointLibraryEntries($arrayLibrary)
+$sharepoint.fileClassification($sharepoint.documentsList, $labelId, $dataOwner, $sharepointLoginUrl)
 
 "$(Get-Date) [Processing] Stopped -----------------------" >> $Global:logFile
 
