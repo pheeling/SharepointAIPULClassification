@@ -5,24 +5,34 @@ function Get-NewSharepointClassification($tenantID){
 class SharepointClassification {
 
     [String] $tenantID
-    [String] $credentialFilepath = "..\ressources\${env:USERNAME}_cred_$($this.tenantID).xml"
-    [PSCredential] $credentials
+    [String] $sharepointCredentialFilepath = "$Global:resourcespath\${env:USERNAME}_sharepointCred_$($tenantID).xml"
+    [PSCredential] $sharepointCredentials
+    [String] $svcCredentialFilepath = "$Global:resourcespath\${env:USERNAME}_svcCred_$($tenantID).xml"
+    [PSCredential] $svcCredentials
     [Array] $documentsList
 
     SharepointClassification($tenantID){
-        if (!(Test-Path $this.credentialFilepath)) {
-            Get-Credential | Export-Clixml -Path $this.credentialFilepath
+        if (!(Test-Path $this.sharepointCredentialFilepath)) {
+            Get-Credential | Export-Clixml -Path $this.sharepointCredentialFilepath
         }
-        $this.credentials = Import-Clixml $this.credentialFilepath
+        $this.sharepointCredentials = Import-Clixml $this.sharepointCredentialFilepath
         $this.tenantID = $tenantID
     }
 
     connectSPO([uri] $sharepointLoginURL){
-        Connect-PnPOnline -url  $sharepointLoginUrl -credential $this.credentials
+        #Connect-PnPOnline -url  $sharepointLoginUrl -credential $this.sharepointCredentials
+        Connect-PnPOnline -url  $sharepointLoginUrl -UseWebLogin
     }
 
     connectAIPService([String] $webAppID, [String] $webAppKey){
-        Set-AIPAuthentication -AppId $webAppID -AppSecret $webAppKey -TenantId $this.tenantID -DelegatedUser $this.credentials.UserName -OnBehalfOf $this.credentials
+        if (!(Test-Path $this.svcCredentialFilepath)) {
+            Get-Credential | Export-Clixml -Path $this.svcCredentialFilepath
+            $this.svcCredentials = Import-Clixml $this.svcCredentialFilepath
+            Write-Error "If your running this script the first time, please run Set-AIPAuthentication with elevated Privileges, 
+            Set-AIPAuthentication -AppId $webAppID -AppSecret $webAppKey -TenantId $this.tenantID -DelegatedUser $this.sharepointCredentials.UserName -OnBehalfOf $this.svcCredentials"
+            Exit 1
+        }
+        
     }
 
     [string[]] readDocumentLibraryListFile($documentLibraryList){
@@ -31,7 +41,7 @@ class SharepointClassification {
 
     getSharepointLibraryEntries($array){
         foreach ($entry in $array){
-            $this.documentsList += Get-PnPListItem -List $entry
+            $this.documentsList += Get-PnPFolder -List $entry
         }
     }
 
