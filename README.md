@@ -29,5 +29,5 @@ TODO: Link Docker repo and github code.
 This is an example how to interface between different API's and how to use Partner Center to integration into different platforms. Clone this example and create your own repo.
 
 # Important
-AIP commands can't be executed against Sharepoint Online files. The script will download each specified file into local directory .\ressources.
+AIP commands can't be executed against Sharepoint Online files. The script will download each specified file into local directory .\resources.
 Docker version includes a filter function based on the name of the files.
